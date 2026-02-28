@@ -2,7 +2,7 @@ import { Link } from "react-router";
 import { ChevronRightIcon, Code2Icon } from "lucide-react";
 import { getDifficultyBadgeClass } from "../lib/utils";
 import Navbar from "../components/NavBar";
-import { PROBLEMS } from "../data/Problems";
+import { PROBLEMS } from "../data/problems.js";
 
 function ProblemsPage() {
   const problems = Object.values(PROBLEMS);
