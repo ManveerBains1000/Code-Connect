@@ -5,7 +5,7 @@ export async function createSession(req,res){
     try {
         const {problem,difficulty} = req.body;
         const userId = req.user._id;
-        const clerkId = req.user.clerkId;
+        const streamUserId = req.user._id.toString();
 
         if (!problem || !difficulty) return res.status(400).json({msg:"Problem and Difficulty is required"});
 
@@ -14,22 +14,28 @@ export async function createSession(req,res){
 
         const session = await Session.create({problem,difficulty,host:userId,callId})
 
-        await streamClient.video.call("default",callId).getOrCreate({
-            data:{
-                created_by_id:clerkId,
-                custom:{
-                    problem:problem,
-                    difficulty:difficulty,
-                    sessionId: session._id.toString(),
+        // Stream operations are non-blocking — session creation always succeeds
+        try {
+            await streamClient.video.call("default",callId).getOrCreate({
+                data:{
+                    created_by_id:streamUserId,
+                    custom:{
+                        problem:problem,
+                        difficulty:difficulty,
+                        sessionId: session._id.toString(),
+                    }
                 }
-            }
-        })
-        const channel = chatClient.channel("messaging",callId,{
-            name:`${problem} Session`,
-            created_by_id:clerkId,
-            members: [clerkId]
-        })
-        await channel.create();
+            })
+            const channel = chatClient.channel("messaging",callId,{
+                name:`${problem} Session`,
+                created_by_id:streamUserId,
+                members: [streamUserId]
+            })
+            await channel.create();
+        } catch (streamError) {
+            console.error("Stream setup failed (non-fatal):", streamError.message);
+        }
+
         return res.status(201).json({session:session})
     } catch (error) {
         console.error("Error in creating a session",error.message)
@@ -39,7 +45,7 @@ export async function createSession(req,res){
 
 export async function getActiveSessions(req,res){
     try {
-        const sessions = await Session.find({status:"active"}).populate("host","name profileImage email clerkId").sort({createdAt:-1}).limit(20);
+        const sessions = await Session.find({status:"active"}).populate("host","name profileImage email").sort({createdAt:-1}).limit(20);
         res.status(200).json({sessions})
     } catch (error) {
         console.error("Error in getting active sessions",error.message);
@@ -65,8 +71,8 @@ export async function getRecentSessions(req,res){
 export async function getSessionById(req,res){
     try {
         const {id} = req.params;
-        const session = Session.findById(id).populate("host","name email profileImage clerkId")
-        .populate("participant", "name email profileImage clerkId")
+        const session = await Session.findById(id).populate("host","name email profileImage")
+        .populate("participant", "name email profileImage")
 
         if (!session) return res.status(404).json({msg:"Session not found"});
 
@@ -81,7 +87,7 @@ export async function joinSession(req,res) {
     try {
         const {id} = req.params;
         const userId = req.user._id;
-        const clerkId = req.user.clerkId;
+        const streamUserId = req.user._id.toString();
         
         const session = await Session.findById(id);
 
@@ -99,7 +105,7 @@ export async function joinSession(req,res) {
         await session.save(); 
 
         const channel = chatClient.channel("messaging",session.callId);
-        await channel.addMembers([clerkId])
+        await channel.addMembers([streamUserId])
 
         return res.status(200).json({session});
     } catch (error) {

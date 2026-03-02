@@ -5,7 +5,7 @@ import dns from "dns"
 export const connectDB = async() => {
     try{
         dns.setServers(["1.1.1.1", "8.8.8.8"]);        
-        const conn = await mongoose.connect(`${ENV.MONGODB_URI}/${ENV.DB_NAME}`);
+        const conn = await mongoose.connect(ENV.MONGODB_URI, { dbName: ENV.DB_NAME });
         console.log("Connected to MongoDB: ",conn.connection.host);
     }
     catch(error){

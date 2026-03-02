@@ -10,7 +10,6 @@ import {
   VideoIcon,
   ZapIcon,
 } from "lucide-react";
-import { SignInButton } from "@clerk/clerk-react";
 const HomePage = () => {
   return (
     <div className="bg-linear-to-br from-base-100 via-base-200 to-base-300">
@@ -33,12 +32,13 @@ const HomePage = () => {
               </span>
             </div>
           </Link>
-          <SignInButton mode="modal">
-            <button className="group px-6 py-3 bg-linear-to-r from-primary to-secondary rounded-xl text-white font-semibold text-sm shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 flex items-center gap-2">
-              <span>Get Started</span>
-              <ArrowRightIcon className="size-4 group-hover:translate-x-1 transition-transform" />
-            </button>
-          </SignInButton>
+          <Link
+            to="/login"
+            className="group px-6 py-3 bg-linear-to-r from-primary to-secondary rounded-xl text-white font-semibold text-sm shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 flex items-center gap-2"
+          >
+            <span>Get Started</span>
+            <ArrowRightIcon className="size-4 group-hover:translate-x-1 transition-transform" />
+          </Link>
         </div>
       </nav>
       {/* hero section */}
@@ -78,12 +78,10 @@ const HomePage = () => {
             </div>
 
             <div className="flex flex-wrap gap-4">
-              <SignInButton mode="modal">
-                <button className="btn btn-primary btn-lg">
-                  Start Coding Now
-                  <ArrowRightIcon className="size-5" />
-                </button>
-              </SignInButton>
+              <Link to="/login" className="btn btn-primary btn-lg">
+                Start Coding Now
+                <ArrowRightIcon className="size-5" />
+              </Link>
 
               <button className="btn btn-outline btn-lg">
                 <VideoIcon className="size-5" />

@@ -1,10 +1,8 @@
 import axios from "axios"
 
-const axiosInstance = axios.create(
-    {
-        baseURL: import.meta.env.VITE_API_URL,
-        withCredentials:true
-    }
-)
+const axiosInstance = axios.create({
+    baseURL: '/api',
+    withCredentials: true, // sends JWT cookie automatically on every request
+})
 
 export default axiosInstance;

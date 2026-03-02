@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { useNavigate, useParams } from "react-router";
 import { PROBLEMS } from "../data/problems.js";
-import Navbar from "../components/NavBar";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import ProblemDescription from "../components/ProblemDescription";
 import { Code } from "lucide-react";
@@ -9,6 +8,8 @@ import CodeEditor from "../components/Codeeditor";
 import OutputPanel from "../components/OutputPanel";
 import { executeCode } from "../lib/Piston.js";
 import toast from "react-hot-toast";
+import confetti from "canvas-confetti";
+
 const ProblemPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -31,56 +32,94 @@ const ProblemPage = () => {
   const handleProblemChange = (newProblemId) => {
     navigate(`/problem/${newProblemId}`);
   };
-  const normalizeOutput = (output) => {
-    return output
+
+  const normalizeLine = (line) =>
+    line
+      .trim()
+      .replace(/\[\s+/g, "[")
+      .replace(/\s+\]/g, "]")
+      .replace(/\s*,\s*/g, ",");
+
+  const normalizeOutput = (out) =>
+    out
       .trim()
       .split("\n")
-      .map((line) =>
-        line
-          .trim()
-          .replace(/\[\s+/g, "[")
-          .replace(/\s+\]/g, "]")
-          .replace(/\s*,\s*/g, ","),
-      )
-      .filter((line) => line.length > 0)
+      .map(normalizeLine)
+      .filter((l) => l.length > 0)
       .join("\n");
-  };
-  const triggerConfetti = () => {
-        confetti({
-      particleCount: 80,
-      spread: 250,
-      origin: { x: 0.2, y: 0.6 },
-    });
 
-    confetti({
-      particleCount: 80,
-      spread: 250,
-      origin: { x: 0.8, y: 0.6 },
-    });
+  const triggerConfetti = () => {
+    confetti({ particleCount: 80, spread: 250, origin: { x: 0.2, y: 0.6 } });
+    confetti({ particleCount: 80, spread: 250, origin: { x: 0.8, y: 0.6 } });
   };
-  const checkIfTestsPassed = (actualOutput, expectedOutput) => {
-        const normalizedActual = normalizeOutput(actualOutput);
-    const normalizedExpected = normalizeOutput(expectedOutput);
-    return normalizedActual == normalizedExpected;
-  }
+
+  const buildTestResults = (rawOutput, language) => {
+    const examples = currentProblem.examples || [];
+    const expectedBlock = currentProblem.expectedOutput?.[language] || "";
+    const expectedLines = expectedBlock
+      .split("\n")
+      .map(normalizeLine)
+      .filter((l) => l.length > 0);
+    const actualLines = (rawOutput || "")
+      .split("\n")
+      .map(normalizeLine)
+      .filter((l) => l.length > 0);
+
+    return expectedLines.map((expected, i) => ({
+      input: examples[i]?.input || `Case ${i + 1}`,
+      label: examples[i]?.input || "",
+      expected,
+      actual: actualLines[i] ?? "",
+      passed: (actualLines[i] ?? "") === expected,
+    }));
+  };
+
+  const determineVerdict = (result, testResults) => {
+    if (!result.success) {
+      const err = (result.error || "").toLowerCase();
+      if (
+        err.includes("compile") ||
+        err.includes("syntax") ||
+        err.includes("error:") ||
+        err.includes("unexpected")
+      )
+        return "Compilation Error";
+      return "Runtime Error";
+    }
+    return testResults.every((t) => t.passed) ? "Accepted" : "Wrong Answer";
+  };
+
   const handleRunCode = async () => {
     setIsRunning(true);
     setOutput(null);
     const result = await executeCode(selectedLanguage, code);
-    setOutput(result);
+    const testResults = result.success
+      ? buildTestResults(result.output, selectedLanguage)
+      : [];
+    const verdict = determineVerdict(result, testResults);
+
+    const enriched = {
+      ...result,
+      verdict,
+      testResults,
+      language: selectedLanguage,
+    };
+    setOutput(enriched);
     setIsRunning(false);
 
-    if (result.success) {
-      const expectedOutput = currentProblem.expectedOutput[selectedLanguage];
-      const testsPassad = checkIfTestsPassed(result.output, expectedOutput);
-      if (testsPassad) {
-        toast.success("All tests passed! Great job!");
-      } else {
-        toast.error("Tests failed. check your output!");
-      }
+    if (verdict === "Accepted") {
+      triggerConfetti();
+      toast.success("All tests passed! Great job!");
+    } else if (verdict === "Wrong Answer") {
+      toast.error("Wrong answer — check your output!");
     } else {
-      toast.error("Code excution failed!");
+      toast.error(`${verdict}`);
     }
+  };
+
+  const handleReset = () => {
+    setCode(currentProblem.starterCode[selectedLanguage]);
+    setOutput(null);
   };
   useEffect(() => {
     if (id && PROBLEMS[id]) {
@@ -119,7 +158,14 @@ const ProblemPage = () => {
               </Panel>
               <PanelResizeHandle className="h-2 bg-base-300 hover:bg-primary transition-colors cursor-row-resize" />
               <Panel defaultSize={30} minSize={20}>
-                <OutputPanel />
+                <OutputPanel
+                  output={output}
+                  isRunning={isRunning}
+                  selectedLanguage={selectedLanguage}
+                  problem={currentProblem}
+                  onRerun={handleRunCode}
+                  onReset={handleReset}
+                />
               </Panel>
             </PanelGroup>
           </Panel>

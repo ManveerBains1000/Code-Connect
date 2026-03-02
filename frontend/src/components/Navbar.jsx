@@ -1,9 +1,10 @@
 import { Link, useLocation } from "react-router";
-import { BookOpenIcon, LayoutDashboardIcon, SparklesIcon } from "lucide-react";
-import { UserButton } from "@clerk/clerk-react";
+import { BookOpenIcon, LayoutDashboardIcon, LogOutIcon, SparklesIcon } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 function Navbar() {
   const location = useLocation();
+  const { logout } = useAuth();
 
 
   const isActive = (path) => location.pathname === path;
@@ -22,7 +23,7 @@ function Navbar() {
 
           <div className="flex flex-col">
             <span className="font-black text-xl bg-linear-to-r from-primary via-secondary to-accent bg-clip-text text-transparent font-mono tracking-wider">
-              Talent IQ
+              Code Connect
             </span>
             <span className="text-xs text-base-content/60 font-medium -mt-1">Code Together</span>
           </div>
@@ -65,9 +66,14 @@ function Navbar() {
             </div>
           </Link>
 
-          <div className="ml-4 mt-2">
-            <UserButton />
-          </div>
+          <button
+            onClick={logout}
+            className="btn btn-ghost btn-sm gap-2 ml-4"
+            title="Sign out"
+          >
+            <LogOutIcon className="size-4" />
+            <span className="hidden sm:inline">Sign out</span>
+          </button>
         </div>
       </div>
     </nav>
