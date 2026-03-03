@@ -66,7 +66,7 @@ function ActiveSessions({ sessions, isLoading, isUserInSession }) {
                       <div className="flex items-center gap-4 text-sm opacity-80">
                         <div className="flex items-center gap-1.5">
                           <CrownIcon className="size-4" />
-                          <span className="font-medium">{session.host?.name}</span>
+                          <span className="font-medium">{session.host?.username || session.host?.name}</span>
                         </div>
                         <div className="flex items-center gap-1.5">
                           <UsersIcon className="size-4" />

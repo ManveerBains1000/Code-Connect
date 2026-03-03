@@ -9,6 +9,7 @@ import OutputPanel from "../components/OutputPanel";
 import { executeCode } from "../lib/Piston.js";
 import toast from "react-hot-toast";
 import confetti from "canvas-confetti";
+import Navbar from "../components/Navbar.jsx";
 
 const ProblemPage = () => {
   const { id } = useParams();

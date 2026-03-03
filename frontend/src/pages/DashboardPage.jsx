@@ -3,7 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { useState } from "react";
 import { useActiveSessions, useCreateSession, useMyRecentSessions } from "../hooks/useSessions";
 
-import Navbar from "../components/Navbar";
+import Navbar from "../components/Navbar.jsx";
 import WelcomeSection from "../components/WelcomeSection";
 import StatsCards from "../components/StatsCards";
 import ActiveSessions from "../components/ActiveSessions";

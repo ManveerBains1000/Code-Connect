@@ -14,7 +14,7 @@ function WelcomeSection({ onCreateSession }) {
                 <SparklesIcon className="w-6 h-6 text-white" />
               </div>
               <h1 className="text-5xl font-black bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-                Welcome back, {user?.name?.split(' ')[0] || "there"}!
+                Welcome back, {user?.username?.split(' ')[0] || "there"}!
               </h1>
             </div>
             <p className="text-xl text-base-content/60 ml-16">

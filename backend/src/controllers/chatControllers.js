@@ -9,12 +9,12 @@ export async function getStreamToken(req,res){
             {
                 token,
                 userId: streamUserId,
-                userName:req.user.name,
-                userImage:req.user.profileImage,
+                userName: req.user.username,
+                userImage: req.user.profileImage,
             }
         )
     } catch (error) {
         console.log("Error in getStreamToken controller: ", error.message)
-        res.status(500).json({message:"Interval server error"})  
+        res.status(500).json({message:"Internal server error"})  
     }
 }

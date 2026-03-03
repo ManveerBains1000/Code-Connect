@@ -16,12 +16,10 @@ const SessionPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const { data: sessionData, isLoading } = useSessionsById(id);
-  const session = sessionData?.session;
+  const { data: sessionData, isLoading:loadingSession,refetch } = useSessionsById(id);
 
-  const joinMutation = useJoinSession(id);
-  const endMutation = useEndSession(id);
-
+  const joinMutation = useJoinSession();
+  const endMutation = useEndSession();
   const problem = session ? PROBLEMS[session.problem] : null;
   const fallbackProblem = Object.values(PROBLEMS)[0];
   const currentProblem = problem || fallbackProblem;

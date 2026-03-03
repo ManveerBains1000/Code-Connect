@@ -45,7 +45,7 @@ export async function createSession(req,res){
 
 export async function getActiveSessions(req,res){
     try {
-        const sessions = await Session.find({status:"active"}).populate("host","name profileImage email").sort({createdAt:-1}).limit(20);
+        const sessions = await Session.find({status:"active"}).populate("host","username profileImage email").sort({createdAt:-1}).limit(20);
         res.status(200).json({sessions})
     } catch (error) {
         console.error("Error in getting active sessions",error.message);
@@ -143,7 +143,8 @@ export async function endSession(req,res){
             return res.status(200).json({session,msg:"Session is successfully ended"})
         }
     } catch (error) {
-        
+        console.error("Error ending session", error.message);
+        res.status(500).json({ msg: "Internal Server Error" });
     }
 }
 
